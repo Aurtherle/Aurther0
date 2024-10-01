@@ -72,6 +72,10 @@ export async function handler(chatUpdate) {
         if (!isNumber(user.level)) user.level = 0
         if (!('role' in user)) user.role = 'Tadpole'
         if (!('autolevelup' in user)) user.autolevelup = false
+         // Count user messages
+        if (!isNumber(user.messages))
+        user.messages = 0
+    user.messages++
       } else {
         global.db.data.users[m.sender] = {
           exp: 0,
@@ -89,7 +93,11 @@ export async function handler(chatUpdate) {
           warn: 0,
           level: 0,
           role: 'Tadpole',
-          autolevelup: false,
+          autolevelup: true,
+          messages: 1, // Start counting messages at 1 for new users
+          kickTime: 0,
+          scheduledKick: false,
+          remainingKickTime: 0,
         }
       }
       let chat = global.db.data.chats[m.chat]
