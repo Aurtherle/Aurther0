@@ -1,11 +1,7 @@
 let handler = async (m, { conn, args, text, usedPrefix, command }) => {
-  /*if (global.db.data.users[m.sender].level < 5) {
-    return conn.reply(m.chat, 'You must be at least level 5 to use this command.', m);
-  }*/
+  let fa = `🟥 *يرجى تحديد كمية الذهب التي تريد القتال بها*
 
-  let fa = `🟥 *Provide the amount of gold to bet*
-
-*Example:*
+*مثال:*
 ${usedPrefix + command} 1000`.trim()
   if (!args[0]) throw fa
   if (isNaN(args[0])) throw fa
@@ -21,22 +17,21 @@ ${usedPrefix + command} 1000`.trim()
 
   let time = users.lastcf + 90000
   if (new Date() - users.lastcf < 90000)
-    throw `You can play cock-fight again in ${msToTime(time - new Date())}`
-  if (amount < 100) throw `🟥 *You can't bet gold less than 100*`
+    throw `يمكنك لعب قتال الدجاج مرة أخرى بعد ${msToTime(time - new Date())}`
+  if (amount < 100) throw `🟥 *لا يمكنك القتال بأقل من 100 بيلي*`
   if (users.credit < amount)
-    throw `🟥 *You don't have enough money for this bet.*\n*You currently have only ${credit} in gold.*`
+    throw `🟥 *ليس لديك ما يكفي من البيلي لهذه للقتال.*\n*لديك حاليًا فقط ${credit} بيلي.*`
   if (users.chicken < 1) {
-    throw `🟥 *You do not have any chicks to bet* \nUse the command ${usedPrefix}buy-chicken`
+    throw `🟥 *ليس لديك أي دجاجة للقتال* \nاستخدم الأمر ${usedPrefix}buy-chicken`
   }
-  //if (amount > 100000) throw `🟥 *You can't bet gold more than 100000*`
 
-  let botScore = Math.ceil(Math.random() * 35) * 1 // Random score for the bot (1 to 51)
+  let botScore = Math.ceil(Math.random() * 35) * 1 // Random score for the bot (1 to 35)
   let playerScore = Math.floor(Math.random() * 101) * 1 // Random score for the player (1 to 100)
-  let status = `Your chicken died 🪦`
+  let status = `دجاجتك ماتت 🪦`
 
   if (botScore < playerScore) {
     users.credit += amount * 1
-    status = `Your lil chicken won the fight, and made you 🪙 ${amount * 2} gold richer! 🐥`
+    status = `دجاجتك الصغيرة فازت بالقتال، وربحت لك 🪙 ${amount * 2} بيلي! 🐥`
   } else {
     users.credit -= amount * 1
     users.chicken -= 1
@@ -51,7 +46,7 @@ ${usedPrefix + command} 1000`.trim()
 
 handler.help = ['cock-fight <amount>']
 handler.tags = ['economy']
-handler.command = ['cock-fight', 'cf']
+handler.command = ['قتال']
 
 handler.group = true
 
@@ -67,14 +62,15 @@ function msToTime(duration) {
   minutes = minutes < 10 ? '' + minutes : minutes
   seconds = seconds < 10 ? '' + seconds : seconds
 
-  return minutes + ' minutes ' + seconds + ' seconds'
+  return minutes + ' دقيقة ' + seconds + ' ثانية'
 }
+
 function pickRandom(list) {
   return list[Math.floor(list.length * Math.random())]
 }
 
 /**
- * Detect if thats number
+ * Detect if that's a number
  * @param {Number} x
  * @returns Boolean
  */

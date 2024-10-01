@@ -1,17 +1,17 @@
 const free = 2000
-const prem = 5000
+const prem = 5000000
 
 let handler = async (m, { conn, isPrems }) => {
   let time = global.db.data.users[m.sender].lastclaim + 86400000
   if (new Date() - global.db.data.users[m.sender].lastclaim < 86400000)
-    throw `You have already claimed your daily gold recently. Claim again in *${msToTime(time - new Date())}* `
+    throw `لقد قمت بالمطالبة بالذهب اليومي مؤخرًا. يمكنك المطالبة مرة أخرى بعد *${msToTime(time - new Date())}*`
   global.db.data.users[m.sender].credit += isPrems ? prem : free
-  m.reply(`🎉 *${isPrems ? prem : free} gold has been added to your wallet*`)
+  m.reply(`🎉 *تمت إضافة ${isPrems ? prem : free} ذهب إلى محفظتك*`)
   global.db.data.users[m.sender].lastclaim = new Date() * 1
 }
 handler.help = ['daily']
 handler.tags = ['economy']
-handler.command = ['daily']
+handler.command = ['يومي']
 
 export default handler
 
@@ -25,5 +25,5 @@ function msToTime(duration) {
   minutes = minutes < 10 ? '0' + minutes : minutes
   seconds = seconds < 10 ? '0' + seconds : seconds
 
-  return hours + ' Hours ' + minutes + ' Minutes'
+  return hours + ' ساعات ' + minutes + ' دقائق'
 }

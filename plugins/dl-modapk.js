@@ -2,8 +2,8 @@ import { download } from 'aptoide-scraper'
 
 let handler = async (m, { conn, usedPrefix: prefix, command, text }) => {
   try {
-    if (command === 'apk') {
-      if (!text) throw `*[❗] Please provide the APK Name you want to download.*`
+    if (command === 'تطبيق') {
+      if (!text) throw `*[❗] يرجى تقديم اسم APK الذي تريد تنزيله.*`
 
       await conn.reply(m.chat, global.wait, m)
       let data = await download(text)
@@ -11,7 +11,7 @@ let handler = async (m, { conn, usedPrefix: prefix, command, text }) => {
       if (data.size.replace(' MB', '') > 200) {
         return await conn.sendMessage(
           m.chat,
-          { text: '*[⛔] The file is too large.*' },
+          { text: '*[⛔] الملف كبير جداً.*' },
           { quoted: m }
         )
       }
@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix: prefix, command, text }) => {
       if (data.size.includes('GB')) {
         return await conn.sendMessage(
           m.chat,
-          { text: '*[⛔] The file is too large.*' },
+          { text: '*[⛔] الملف كبير جداً.*' },
           { quoted: m }
         )
       }
@@ -36,11 +36,11 @@ let handler = async (m, { conn, usedPrefix: prefix, command, text }) => {
       )
     }
   } catch {
-    throw `*[❗] An error occurred. Make sure to provide a valid link.*`
+    throw `*[❗] حدث خطأ. تأكد من تقديم رابط صالح.*`
   }
 }
 
 handler.help = ['modapk']
 handler.tags = ['downloader']
-handler.command = /^apk$/i
+handler.command = /^تطبيق$/i
 export default handler

@@ -9,11 +9,11 @@ import os from 'os'
 const streamPipeline = promisify(pipeline)
 
 const handler = async (m, { conn, command, text, args, usedPrefix }) => {
-  if (!text) throw `give a text to search Example: *${usedPrefix + command}* sefali odia song`
+  if (!text) throw `يرجى تقديم نص للبحث. مثال: *${usedPrefix + command}* sefali odia song`
   conn.GURUPLAY = conn.GURUPLAY ? conn.GURUPLAY : {}
   await conn.reply(m.chat, wait, m)
   const result = await searchAndDownloadMusic(text)
-  const infoText = `✦ ──『 *GURU PLAYER* 』── ⚝ \n\n [ ⭐ Reply the number of the desired search result to get the Audio]. \n\n`
+  const infoText = `*❃ ────────⊰ ❀ ⊱──────── ❃* \n\n [ ⭐ قم بالرد برقم نتيجة البحث المطلوبة للحصول على الصوت ]. \n\n`
 
   const orderedLinks = result.allLinks.map((link, index) => {
     const sectionNumber = index + 1
@@ -72,7 +72,7 @@ handler.before = async (m, { conn }) => {
     await conn.sendMessage(m.chat, doc, { quoted: m })
   } else {
     m.reply(
-      'Invalid sequence number. Please select the appropriate number from the list above.\nBetween 1 to ' +
+      'رقم تسلسل غير صالح. يرجى اختيار الرقم المناسب من القائمة أعلاه.\nبين 1 إلى ' +
         result.allLinks.length
     )
   }
@@ -80,7 +80,7 @@ handler.before = async (m, { conn }) => {
 
 handler.help = ['play']
 handler.tags = ['downloader']
-handler.command = /^(play)$/i
+handler.command = /^(شغل)$/i
 handler.limit = true
 export default handler
 
@@ -96,7 +96,7 @@ function formatBytes(bytes, decimals = 2) {
 async function searchAndDownloadMusic(query) {
   try {
     const { videos } = await yts(query)
-    if (!videos.length) return 'Sorry, no video results were found for this search.'
+    if (!videos.length) return 'عذرًا، لم يتم العثور على نتائج فيديو لهذه البحث.'
 
     const allLinks = videos.map(video => ({
       title: video.title,
@@ -115,7 +115,7 @@ async function searchAndDownloadMusic(query) {
 
     return jsonData
   } catch (error) {
-    return 'Error: ' + error.message
+    return 'خطأ: ' + error.message
   }
 }
 
@@ -135,18 +135,18 @@ async function fetchVideoBuffer() {
 
 function generateRandomName() {
   const adjectives = [
-    'happy',
-    'sad',
-    'funny',
-    'brave',
-    'clever',
-    'kind',
-    'silly',
-    'wise',
-    'gentle',
-    'bold',
+    'سعيد',
+    'حزين',
+    'مضحك',
+    'شجاع',
+    'ذكي',
+    'طيب',
+    'غبي',
+    'حكيم',
+    'لطيف',
+    'جريء',
   ]
-  const nouns = ['cat', 'dog', 'bird', 'tree', 'river', 'mountain', 'sun', 'moon', 'star', 'cloud']
+  const nouns = ['قطة', 'كلب', 'طائر', 'شجرة', 'نهر', 'جبل', 'شمس', 'قمر', 'نجم', 'سحابة']
 
   const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)]
   const randomNoun = nouns[Math.floor(Math.random() * nouns.length)]

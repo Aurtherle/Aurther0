@@ -1,8 +1,8 @@
 const xppercredit = 1
 let handler = async (m, { conn, command, args }) => {
-  let count = command.replace(/^(wt|withdraw)/i, '')
+  let count = command.replace(/^(سحب)/i, '')
   count = count
-    ? /all/i.test(count)
+    ? /-الكل/i.test(count)
       ? Math.floor(global.db.data.users[m.sender].bank / xppercredit)
       : parseInt(count)
     : args[0]
@@ -12,17 +12,17 @@ let handler = async (m, { conn, command, args }) => {
   if (global.db.data.users[m.sender].bank >= xppercredit * count) {
     global.db.data.users[m.sender].bank -= xppercredit * count
     global.db.data.users[m.sender].credit += count
-    conn.reply(m.chat, `Transferred 🪙 ${count} gold in your wallet`, m)
+    conn.reply(m.chat, `تم نقل 🪙 ${count} بيلي إلى محفظتك`, m)
   } else
     conn.reply(
       m.chat,
-      `🟥 *You don't have sufficient amount of gold in your bank to make this transaction*`,
+      `🟥 *ليس لديك ما يكفي من الذهب في البنك لإجراء هذه المعاملة*`,
       m
     )
 }
 handler.help = ['withdraw']
 handler.tags = ['economy']
-handler.command = ['withdraw', 'with', 'withdrawall', 'withall', 'wt', 'wtall']
+handler.command = ['سحب', 'with', 'withdrawall', 'سحب-الكل', 'wt', 'wtall']
 
 handler.disabled = false
 
