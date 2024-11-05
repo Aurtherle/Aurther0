@@ -138,7 +138,7 @@ const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const { CONNECTING } = ws
 const { chain } = lodash
-const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
+const PORT = process.env.PORT || process.env.SERVER_PORT || 6000
 
 protoType()
 serialize()
