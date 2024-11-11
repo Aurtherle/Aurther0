@@ -25,6 +25,6 @@ let handler = async (m, { conn, command, usedPrefix }) => {
 }
 handler.help = ['guesseye']
 handler.tags = ['game']
-handler.command = /^ع|عين/i
+handler.command = /^عين/i
 
 export default handler
