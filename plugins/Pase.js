@@ -22,15 +22,14 @@ let handler = async (m, { text, usedPrefix, command, __dirname }) => {
     throw 'Please provide both a file name and new code content.'
   }
 
-  // Make sure the file is in the 'plugins' directory
-  const pathFile = path.join(__dirname, 'plugins', filename)
+  const pathFile = path.join(__dirname, filename)
   
   try {
-    // Write the new code into the file inside the 'plugins' folder
+    // Write the new code into the file
     await _fs.writeFile(pathFile, newCode, 'utf8')
-    await m.reply(`✅ The plugin file *${filename}* has been updated with the new code.`)
+    await m.reply(`✅ The file *${filename}* has been updated with the new code.`)
   } catch (err) {
-    await m.reply(`❎ Failed to update the plugin file *${filename}*.\nError: ${err.message}`)
+    await m.reply(`❎ Failed to update the file *${filename}*.\nError: ${err.message}`)
   }
 }
 
