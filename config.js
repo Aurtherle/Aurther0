@@ -11,7 +11,7 @@ const ownervb = process.env.OWNERS || "966560801636;AURTHER"
 
 const ownerlist = ownervb.split(';');
 
-global.owner = [966560801636];
+global.owner = [];
 for (let i = 0; i < ownerlist.length; i += 2) {
     const owner = [
         ownerlist[i],            
