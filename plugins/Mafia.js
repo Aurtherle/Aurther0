@@ -57,16 +57,32 @@ let handler = async (m, { conn, args, command }) => {
                 chat.started = true;
                 assignRoles(chat); // Assign roles to the players
 
-                // Notify mafia privately about each other
-                chat.roles.mafia.forEach(mafiaId => {
-                    let mafiaPlayers = chat.roles.mafia.filter(id => id !== mafiaId).map(id => getPlayerName(chat, id));
-                    conn.sendMessage(mafiaId, `*أنت جزء من المافيا. أعضاء المافيا هم: ${mafiaPlayers.join(', ')}.*`);
-                });
+                // Announce role distribution to the group
+                await conn.reply(m.chat, "📢 *تم توزيع الأدوار على اللاعبين، وكل لاعب سيعرف دوره الآن!*", m);
 
-                // Notify doctor about their role
-                conn.sendMessage(chat.roles.doctor, `*أنت الطبيب. اختر أحد اللاعبين لحمايته.*`);
+                // Notify mafia and doctor about their roles
+                for (let mafiaId of chat.roles.mafia) {
+                    await conn.sendMessage(mafiaId, "*أنت جزء من المافيا!*");
+                }
 
-                // Start the first night phase after assigning roles
+                await conn.sendMessage(chat.roles.doctor, "*أنت الطبيب، اختر أحد اللاعبين لحمايته.*");
+
+                // Send private messages to each player with their role
+                for (let player of chat.players) {
+                    if (player !== null) {
+                        let roleMessage = `*دورك في اللعبة:* `;
+                        if (chat.roles.mafia.includes(player.id)) {
+                            roleMessage += "مافيا";
+                        } else if (chat.roles.doctor === player.id) {
+                            roleMessage += "طبيب";
+                        } else {
+                            roleMessage += "مدني";
+                        }
+                        await conn.sendMessage(player.id, roleMessage);
+                    }
+                }
+
+                // Announce the start of the first night phase
                 chat.phase = 'night';
                 await conn.reply(m.chat, "🌙 *بدأت الجولة الليلية!*\n- المافيا، اختروا هدفكم.\n- الطبيب، احمِ أحد اللاعبين.", m);
 
@@ -81,7 +97,7 @@ let handler = async (m, { conn, args, command }) => {
 
                     // Notify mafia privately to discuss and choose
                     for (let mafiaId of chat.roles.mafia) {
-                        await conn.sendMessage(mafiaId, `*ناقش مع زملائك واختر الضحية.*`);
+                        await conn.sendMessage(mafiaId, "*ناقش مع زملائك واختر الضحية.*");
                     }
 
                     // Let doctor select a protection target
@@ -171,79 +187,38 @@ let handler = async (m, { conn, args, command }) => {
 
     // Get response from doctor
     async function getResponseFromDoctor(chatId) {
-        // Wait for doctor player to select a target to protect
+        // Wait for doctor to select a player to protect
         return "الضحية"; // Replace with actual logic
+    }
+
+    // Format players for display
+    function formatPlayers(players) {
+        return players.map((player, i) => `${i + 1}. ${player ? player.name : "فارغ"}`).join("\n");
     }
 
     // Shuffle array
     function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+        let currentIndex = array.length, randomIndex, temporaryValue;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
         }
         return array;
     }
 
-    // Format players list
-    function formatPlayers(players) {
-        let list = players.map((player, index) => {
-            if (player) {
-                return `${index + 1}. ${player.name}`;
-            }
-            return `${index + 1}. [فارغ]`;
-        });
-        return list.join("\n");
-    }
-
-    // Process night actions (mafia and doctor)
+    // Process night actions (mafia, doctor)
     async function processNightActions(chatId, chat) {
-        let victim = chat.nightActions.mafia;
-        let doctorProtected = chat.nightActions.doctor;
+        let victim = chat.nightActions.mafia[0];
+        let protectedPlayer = chat.nightActions.doctor;
 
-        // If the mafia's victim was protected by the doctor, announce protection
-        if (victim === doctorProtected) {
+        if (victim === protectedPlayer) {
             await conn.reply(chatId, `*❃ المافيا اختارت ضحية: ${victim} والطبيب قام بحمايته.*`, chatId);
         } else {
-            // If not protected, eliminate victim
             await conn.reply(chatId, `*❃ المافيا اختارت ضحية: ${victim}.*`, chatId);
-            removePlayer(chat, victim); // Remove player from the game
-        }
-    }
-
-    // Remove player from the game
-    function removePlayer(chat, playerId) {
-        chat.players = chat.players.filter(player => player.id !== playerId);
-        chat.roles.mafia = chat.roles.mafia.filter(id => id !== playerId);
-        chat.roles.civilians = chat.roles.civilians.filter(id => id !== playerId);
-        chat.roles.doctor = chat.roles.doctor.filter(id => id !== playerId);
-    }
-
-    // Handle voting phase
-    async function handleVoting(chatId, chat) {
-        // Collect votes and eliminate the most voted player
-        let votes = {}; // Collect votes and tally
-        await conn.reply(chatId, "*❃ التصويت انتهى. جاري حساب الأصوات...*");
-
-        let mostVotedPlayer = Object.entries(votes).sort((a, b) => b[1] - a[1])[0][0]; // Player with highest votes
-        removePlayer(chat, mostVotedPlayer);
-
-        // Notify about the player being eliminated
-        await conn.reply(chatId, `*❃ تم إقصاء ${getPlayerName(chat, mostVotedPlayer)}. دور اللاعب: ${getRole(mostVotedPlayer)}.*`, chatId);
-    }
-
-    // Get player name
-    function getPlayerName(chat, playerId) {
-        return chat.players.find(player => player.id === playerId).name;
-    }
-
-    // Get player role
-    function getRole(playerId) {
-        if (chat.roles.mafia.includes(playerId)) {
-            return "مافيا";
-        } else if (chat.roles.doctor === playerId) {
-            return "طبيب";
-        } else {
-            return "مدني";
+            removePlayer(chat, victim);
         }
     }
 };
