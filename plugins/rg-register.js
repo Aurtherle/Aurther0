@@ -1,42 +1,64 @@
-//import db from '../lib/database.js'
+import { createHash } from 'crypto';
 
-import { createHash } from 'crypto'
-let Reg = /\|?(.*)([.|] *?)([0-9]*)$/i
-let handler = async function (m, { conn, text, usedPrefix, command }) {
-  let user = global.db.data.users[m.sender]
-  let name2 = conn.getName(m.sender)
-  if (user.registered === true)
-    throw `✳️ You are already registered\n\nDo you want to re-register?\n\n 📌 Use this command to remove your record \n*${usedPrefix}unreg* <Serial number>`
-  if (!Reg.test(text))
-    throw `⚠️ Format incorrect\n\n ✳️ Use this command: *${usedPrefix + command} name.age*\n📌Exemple : *${usedPrefix + command}* ${name2}.16`
-  let [_, name, splitter, age] = text.match(Reg)
-  if (!name) throw '✳️ The name cannot be empty'
-  if (!age) throw '✳️ age cannot be empty'
-  if (name.length >= 30) throw '✳️The name is too long'
-  age = parseInt(age)
-  if (age > 100) throw '👴🏻 Wow grandpa wants to play bot'
-  if (age < 5) throw '🚼  there is a grandpa baby jsjsj '
-  user.name = name.trim()
-  user.age = age
-  user.regTime = +new Date()
-  user.registered = true
-  let sn = createHash('md5').update(m.sender).digest('hex')
-  m.reply(
-    `
-┌─「 *REGISTERED* 」─
-▢ *NUMBER:* ${name}
-▢ *AGE* : ${age} years
-▢ *SERIEL NUMBER* :
-${sn}
-└──────────────
+let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }) => {      
+    let who = m.quoted ? m.quoted.sender : (m.mentionedJid && m.mentionedJid[0]) ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
 
- *${usedPrefix}help* to see menu
-`.trim()
-  )
-}
-handler.help = ['reg'].map(v => v + ' <name.age>')
-handler.tags = ['rg']
+    if (!(who in global.db.data.users)) throw `المستخدم غير موجود في قاعدة البيانات`;
 
-handler.command = ['verify', 'reg', 'register', 'registrar']
+    let user = global.db.data.users[who];
 
-export default handler
+    if (user.registered === true) throw `*لقد تم تسجيله بالفعل*`;
+
+    let name = '';
+
+    if (m.mentionedJid && m.mentionedJid.length > 0 && text.trim().split(' ').length > 1) {
+        // Get the name written after the mention
+        name = text.trim().split(' ').slice(1).join(' '); // Extract the name after mention
+    } else {
+        let Reg = /^\s*([^]*)\s*$/;
+        if (!Reg.test(text)) throw `*المثال الصحيح: ${usedPrefix}تسجيل اسمك*`;
+
+        let [_, enteredName] = text.match(Reg);
+        if (!enteredName) throw '*أكتب الاسم*';
+        if (enteredName.length >= 30) throw '*الاسم طويل*';
+
+        name = enteredName.trim();
+    }
+
+    const isNameTaken = Object.values(global.db.data.users).some(existingUser => {
+        if (typeof existingUser.name === 'string') {
+            return existingUser.name.toLowerCase() === name.toLowerCase();
+        }
+        return false;
+    });
+
+    if (isNameTaken) {
+        throw '*الاسم مستخدم بالفعل*';
+    }
+
+    user.name = name;
+    user.regTime = +new Date();
+    user.registered = true;
+
+    let sn = createHash('md5').update(who).digest('hex').slice(0, 21);
+
+    m.reply(`*❃ ──────⊰ ❀ ⊱────── ❃*
+◍ *تم تسجيلك في قاعدة البيانات*
+*❃ ──────⊰ ❀ ⊱────── ❃*
+◍ *الاسم:* *${name}*
+◍ *الايدي:* *${sn}*
+*❃ ──────⊰ ❀ ⊱────── ❃*
+`.trim());
+};
+
+// ... rest of the code remains unchanged
+
+handler.help = ['reg'].map(v => v + ' <الاسم>');
+handler.tags = ['rg'];
+handler.command = ['تسجيل', 'اشتراك', 'register', 'registrar']; 
+handler.group = true;
+handler.admin = true;
+handler.botAdmin = true;
+handler.fail = null;
+
+export default handler;
