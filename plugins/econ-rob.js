@@ -1,4 +1,4 @@
-let ro = 3000
+let ro = 10000
 let handler = async (m, { conn, usedPrefix, command }) => {
   let time = global.db.data.users[m.sender].lastrob + 7200000
   if (new Date() - global.db.data.users[m.sender].lastrob < 7200000)
@@ -31,7 +31,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
 handler.help = ['rob']
 handler.tags = ['economy']
-handler.command = ['سرقة', 'rob']
+handler.command = ['سرقة', 'زرف']
 
 export default handler
 
