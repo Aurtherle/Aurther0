@@ -1,48 +1,64 @@
-import { createHash } from 'crypto'
-import { canLevelUp, xpRange } from '../lib/levelling.js'
+import { createHash } from 'crypto';
+import { canLevelUp, xpRange } from '../lib/levelling.js';
+import Canvacord from 'canvacord';
 
-let handler = async (m, { conn, usedPrefix, command }) => {
-  let who = m.quoted
-    ? m.quoted.sender
-    : m.mentionedJid && m.mentionedJid[0]
-      ? m.mentionedJid[0]
-      : m.fromMe
-        ? conn.user.jid
-        : m.sender
-  if (!(who in global.db.data.users)) throw `✳️ The user is not found in my database`
-  let pp = await conn.profilePictureUrl(who, 'image').catch(_ => './Guru.jpg')
-  let user = global.db.data.users[who]
-  let about = ((await conn.fetchStatus(who).catch(console.error)) || {}).status || ''
-  let { name, exp, credit, lastclaim, registered, regTime, age, level, role, wealth, warn } =
-    global.db.data.users[who]
-  let { min, xp, max } = xpRange(user.level, global.multiplier)
-  let username = conn.getName(who)
-  let math = max - xp
-  let prem = global.prems.includes(who.split`@`[0])
-  let sn = createHash('md5').update(who).digest('hex')
+let handler = async (m, { conn }) => {
+  let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
 
-  // • @${who.replace(/@.+/, '')}
-  let str = `*🪪 Name:* ${username}${about ? '\n\n 🎌 *Bio:* ' + about : ''}
+  if (!(who in global.db.data.users)) throw `✳️ اهذا المستخدم غير موجود ف قاعدة بياناتي`;
 
-*⚠️ Warnings:* ${warn}/${maxwarn}
+  let pp = await conn.profilePictureUrl(who, 'image').catch(_ => './Guru.jpg');
+  let user = global.db.data.users[who];
+  let about = (await conn.fetchStatus(who).catch(console.error) || {}).status || ''
+  let { name, exp, credit, lastclaim, registered, regTime, age, level, role, wealth, warn, messages } = global.db.data.users[who];
+  let { min, xp, max } = xpRange(user.level, global.multiplier);
+  let username = conn.getName(who);
+  let math = max - xp;
+  let prem = global.prems.includes(who.split`@`[0]);
+  let sn = createHash('md5').update(who).digest('hex');
 
-*💰 Gold :* ${credit}
+  let crxp = exp - min
+  let customBackground  = './Assets/rankbg.jpg'
+  let requiredXpToLevelUp = xp
 
-*✨ Level* : ${level}
+  const card = await new Canvacord.Rank()
+  .setAvatar(pp)
+  .setLevel(level)
+  .setCurrentXP(crxp) 
+  .setRequiredXP(requiredXpToLevelUp) 
+  .setProgressBar('#e1d4a7', 'COLOR') // Set progress bar color here
+  .setDiscriminator(who.substring(3, 7))
+  .setCustomStatusColor('#e1d4a7')
+  .setLevelColor('#FFFFFF', '#FFFFFF')
+  .setOverlay('#000000')
+  .setUsername(username)
+  .setBackground('IMAGE', customBackground)
+  .setRank(level, 'LEVEL', false)
+  .renderEmojis(true)
+  .build();
 
-*⬆️ XP* : Total ${exp} (${user.exp - min} / ${xp})\n${math <= 0 ? `Ready for *${usedPrefix}levelup*` : `*${math}xp* missing to level up`}
+  const str = `
+*❃ ──────⊰ ❀ ⊱────── ❃*\n
+  *🪪 الأسم :* ${username}\n
+  *⚠️ الأنذارات:* ${warn}\n
+  *💰 الرصيد :* ${credit} *بيلي*\n
+  *⬆️ الخبره :* ${crxp} / ${requiredXpToLevelUp}\n
+  *✉ الرسائل :* ${messages}\n
+  *🏆 التصنيف :* ${role}\n
+  *📇 الحساب :* ${registered ? 'مسجل': 'غير مسجل'}\n
+  *⭐️ العضوية :*  ${prem ? 'مميز' : 'عضو'}\n
+*❃ ──────⊰ ❀ ⊱────── ❃*`
+ 
 
-*🏆 Rank:* ${role}
+  try {
+    conn.sendFile(m.chat, card, 'rank.jpg', str, m, false, { mentions: [who] });
+    m.react('✅');
+  } catch (error) {
+    console.error(error);
+  }}
 
-*📇 Registered :* ${registered ? 'Yes' : 'No'}
+handler.help = ['prof'];
+handler.tags = ['economy'];
+handler.command = ['رانك','بروفايل'];
 
-*⭐ Premium* : ${prem ? 'Yes' : 'No'}
-`
-  conn.sendFile(m.chat, pp, 'profil.jpg', str, m, false, { mentions: [who] })
-  m.react(done)
-}
-handler.help = ['profile']
-handler.tags = ['group']
-handler.command = ['profile']
-
-export default handler
+export default handler;
