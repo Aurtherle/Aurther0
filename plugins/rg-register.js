@@ -3,7 +3,14 @@ import { createHash } from 'crypto';
 let handler = async (m, { conn, text, args, groupMetadata, usedPrefix, command }) => {      
     let who = m.quoted ? m.quoted.sender : (m.mentionedJid && m.mentionedJid[0]) ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender;
 
-    if (!(who in global.db.data.users)) throw `المستخدم غير موجود في قاعدة البيانات`;
+    // Ensure the user exists in the database
+    if (!global.db.data.users[who]) {
+        global.db.data.users[who] = {
+            registered: false,
+            name: null,
+            regTime: null
+        };
+    }
 
     let user = global.db.data.users[who];
 
