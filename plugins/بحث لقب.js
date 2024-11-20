@@ -22,7 +22,7 @@ const handler = async function(m, { conn, text, usedPrefix }) {
 
     const usersWithSameNameInfo = usersWithSameName.map(userId => {
       const userInfo = global.db.data.users[userId];
-      const tag = `${userId.replace(/@.+/, '')}`;
+      const tag = `${userId.split('@')[0]}`;
       return `${conn.getName(tag)}`;
     });
 
