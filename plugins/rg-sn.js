@@ -12,7 +12,7 @@ const handler = async (m, { conn, args, groupMetadata }) => {
   const { name, kickTime } = user;
 
   let replyMessage = `*❃ ──────⊰ ❀ ⊱────── ❃*\n\n`;
-  replyMessage += `◍ *لقبه : ${name}* \n`;
+  replyMessage += `◍ *لقبهُ: ${name}* \n`;
 
   // Check if the user has a scheduled kick
   if (kickTime) {
