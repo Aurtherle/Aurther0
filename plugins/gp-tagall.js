@@ -51,7 +51,7 @@ let handler = async (m, { conn, participants }) => {
 // Command properties
 handler.help = ['mentionall'];
 handler.tags = ['group'];
-handler.command = /^منشن$/i;
+handler.command = /^(اجارس)$/i;
 handler.group = true;
 handler.admin = true;
 
