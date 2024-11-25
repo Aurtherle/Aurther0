@@ -1,55 +1,124 @@
 import axios from 'axios';
+import yts from 'yt-search'; // Import yt-search library
 
-const handler = async (m, { conn, args, command, usedPrefix }) => {
-  // Check if the message and arguments are valid
+const handler = async (m, { conn, args }) => {
   if (!m || typeof m !== 'object') {
     console.log("Invalid message object.");
     return;
   }
 
-  if (!args[0]) {
-    throw `*Please provide the name of the video or link, e.g., "${usedPrefix}${command} imagine dragons believer".*`;
+  // Validate arguments
+  if (!args.length) {
+    throw `*وين رابط أو اسم الفيديو؟*`;
   }
 
-  // Inform the user that processing has started
-  const { key } = await conn.sendMessage(
+  // Fixed resolution to 720p
+  const resolution = '720';
+
+  // Send initial processing message and store the key for editing later
+  const pingMsg = await conn.sendMessage(
     m.chat,
-    { text: "Processing your request, please wait..." },
+    { text: "🔎 جاري البحث... ⏳" },
     { quoted: m }
   );
 
   try {
-    // Search or download YouTube video using an API
-    const query = args.join(" ");
-    const response = await axios.get(`https://api.yourytapi.com/search`, {
-      params: { query }, // Pass the search term or YouTube link
-    });
+    let videoUrl;
+    let searchResultMessage = "لم يتم العثور على نتائج.";
 
-    // Process the response
-    const result = response.data;
-    if (result.status && result.data?.[0]?.downloadUrl) {
-      const video = result.data[0];
-      const downloadUrl = video.downloadUrl;
-
-      // Send the video to the user
-      const fileName = `${video.title}.mp4`;
-      await conn.sendFile(m.chat, downloadUrl, fileName, `Download complete: ${video.title}`, m);
+    // Check if the input is a URL or a search query
+    if (args[0].startsWith("http")) {
+      // If it's a URL, use it directly
+      videoUrl = args[0];
+      searchResultMessage = `✅ تم العثور على رابط الفيديو! جاري التحميل...`;
     } else {
-      throw new Error("Could not find the video or invalid response from the API.");
+      // If it's a search query, use yt-search to find the video
+      const query = args.join(" ");
+      console.log(`Searching YouTube for: ${query}`);
+
+      const searchResults = await yts(query);
+
+      if (searchResults.videos.length > 0) {
+        const firstResult = searchResults.videos[0];
+        videoUrl = firstResult.url; // Get the URL of the first video
+        searchResultMessage = `✅ تم العثور على الفيديو: *${firstResult.title}* \nجاري التحميل...`;
+      } else {
+        throw new Error("لم يتم العثور على نتائج للبحث.");
+      }
+    }
+
+    // Edit the original message with the search result using relayMessage
+    await conn.relayMessage(
+      m.chat,
+      {
+        protocolMessage: {
+          key: pingMsg.key,
+          type: 14,
+          editedMessage: {
+            conversation: searchResultMessage,
+          },
+        },
+      },
+      {}
+    );
+
+    // Call the Exonity API with the video URL
+    const apiUrl = `https://exonity.tech/api/ytdlp2-faster?apikey=adminsepuh&url=${videoUrl}`;
+    console.log(`Fetching video details from: ${apiUrl}`);
+    const response = await axios.get(apiUrl);
+    const data = response.data;
+
+    if (data.status === 200 && data.result?.media?.mp4) {
+      const title = data.result.title || "video";
+      const downloadUrl = data.result.media.mp4;
+
+      // Edit again to notify the user about the download
+      await conn.relayMessage(
+        m.chat,
+        {
+          protocolMessage: {
+            key: pingMsg.key,
+            type: 14,
+            editedMessage: {
+              conversation: `🎥 *${title}*\n🔗 جاري التحميل ...`,
+            },
+          },
+        },
+        {}
+      );
+
+      // Send the video file (MP4)
+      await conn.sendFile(
+        m.chat,
+        downloadUrl,
+        `${title}.mp4`,
+        `🎉 تم التحميل !\n📌 العنوان: ${title}`,
+        m
+      );
+    } else {
+      throw new Error("لم يتم العثور على رابط تحميل الفيديو.");
     }
   } catch (e) {
-    console.error("An error occurred while processing the YouTube request:", e);
+    console.error("Error during YouTube download:", e.message);
 
-    // Inform the user about the error
-    await conn.sendMessage(
+    // Edit the original message to notify the user about the error
+    await conn.relayMessage(
       m.chat,
-      { text: `An error occurred while processing your request. Please try again later.` },
-      { edit: key }
+      {
+        protocolMessage: {
+          key: pingMsg.key,
+          type: 14,
+          editedMessage: {
+            conversation: `⚠️ حدث خطأ أثناء تحميل الفيديو. تأكد من الرابط أو البحث وحاول مرة أخرى.`,
+          },
+        },
+      },
+      {}
     );
   }
 };
 
-handler.help = ['yt <search term or link>'];
+handler.help = ['youtube <link yt> | <search query>'];
 handler.tags = ['downloader'];
 handler.command = /^(شغل)$/i;
 
