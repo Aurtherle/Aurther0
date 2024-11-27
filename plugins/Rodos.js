@@ -16,13 +16,6 @@ if (/^سم$/i.test(m.text) ) { //sem prefixo
 }
 
 
-if (/^كريس$/i.test(m.text)) { // Match the text "كريس"
-        let filePath = './Assets/krys.mp3'; // Adjust the path to your MP3 file
-        conn.sendFile(m.chat, filePath, 'krys.mp3', null, m);
-        
-}
-
-
 
 if (/^كلزق$/i.test(m.text) ) { //sem prefixo 
  conn.reply(m.chat, `*ما اتخيلك ف صحن*`, m) //wm, null, [['Menu', '#menu']], m) botones :V 
