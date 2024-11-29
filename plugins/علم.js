@@ -17,12 +17,12 @@ let handler = async (m, { conn, command }) => {
         return;
     }
 
-    // Fetch a random football player
-    let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/Footballguess.json')).json();
+    // Fetch a random country flag
+    let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/Flags.json')).json();
     let json = src[Math.floor(Math.random() * src.length)];
 
     // Send the game message
-    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*من اللاعب ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} خبرة\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
+    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*ماهي الدولة ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} خبرة\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
     let msg = await conn.sendFile(m.chat, json.img, '', caption, m);
 
     // Store game state
@@ -106,8 +106,8 @@ function generateHint(name) {
     return hint;
 }
 
-handler.help = ['guessplayer']; // Command help
+handler.help = ['guessflag']; // Command help
 handler.tags = ['game'];
-handler.command = /^لاعب$/i; // Arabic command for "player"
+handler.command = /^علم$/i; // Arabic command for "flag"
 export const exp = 10000
 export default handler;

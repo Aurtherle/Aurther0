@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import similarity from 'similarity';
 
 let timeout = 60000; // 60 seconds timeout
-let poin = 500; // Points reward
+let poin = 10000; // Points reward
 const threshold = 0.72; // Similarity threshold
 
 let games = {}; // Global game state storage
@@ -22,7 +22,7 @@ let handler = async (m, { conn, command }) => {
     let json = src[Math.floor(Math.random() * src.length)];
 
     // Send the game message
-    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*عين من ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} بيلي\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
+    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*عين من ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} خبرة\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
     let msg = await conn.sendFile(m.chat, json.img, '', caption, m);
 
     // Store game state
@@ -51,6 +51,14 @@ handler.all = async function (m) {
     // Ensure the reply is to the bot's question message
     if (!m.quoted || m.quoted.id !== game.msg.id) return;
 
+    // Check if the user asked for a hint
+    if (/^(تلميح)$/i.test(m.text)) {
+        let answer = game.json.name;
+        let hint = generateHint(answer);
+        this.reply(m.chat, `*تلميح:* ${hint}`, m);
+        return;
+    }
+
     // Check if the user surrendered
     if (/^(انسحب|surr?ender)$/i.test(m.text)) {
         clearTimeout(game.timeout);
@@ -66,7 +74,7 @@ handler.all = async function (m) {
     if (answer === correct) {
         // Correct answer
         global.db.data.users[m.sender].exp += game.poin;
-        this.reply(m.chat, `*❃ ──────⊰ ❀ ⊱────── ❃*\n*❀ شوكولولو ❀*\n\n*◍ الجائزة :* ${game.poin} بيلي\n*❃ ──────⊰ ❀ ⊱────── ❃*`, m);
+        this.reply(m.chat, `*❃ ──────⊰ ❀ ⊱────── ❃*\n*❀ شوكولولو ❀*\n\n*◍ الجائزة :* ${game.poin} خبرة\n*❃ ──────⊰ ❀ ⊱────── ❃*`, m);
         clearTimeout(game.timeout);
         delete games[id];
     } else if (similarity(answer, correct) >= threshold) {
@@ -78,8 +86,28 @@ handler.all = async function (m) {
     }
 };
 
+// Generate a randomized hint for the name
+function generateHint(name) {
+    let nameArray = name.split('');
+    let revealedIndexes = [];
+
+    // Reveal a random 50% of the letters
+    while (revealedIndexes.length < Math.ceil(name.length / 2)) {
+        let randomIndex = Math.floor(Math.random() * name.length);
+        if (!revealedIndexes.includes(randomIndex)) {
+            revealedIndexes.push(randomIndex);
+        }
+    }
+
+    // Generate the hint by replacing unrevealed letters with underscores
+    let hint = nameArray
+        .map((char, index) => (revealedIndexes.includes(index) ? char : '_'))
+        .join('');
+    return hint;
+}
+
 handler.help = ['guesseye']; // Command help
 handler.tags = ['game'];
 handler.command = /^ع|عين/i; // Matches Arabic commands for "eye"
-
+export const exp = 10000
 export default handler;
