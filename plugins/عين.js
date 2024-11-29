@@ -17,12 +17,12 @@ let handler = async (m, { conn, command }) => {
         return;
     }
 
-    // Fetch a random football player
-    let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/Footballguess.json')).json();
+    // Fetch a random anime character
+    let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/eyeanime.json')).json();
     let json = src[Math.floor(Math.random() * src.length)];
 
     // Send the game message
-    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*من اللاعب ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} بيلي\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
+    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*عين من ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} بيلي\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
     let msg = await conn.sendFile(m.chat, json.img, '', caption, m);
 
     // Store game state
@@ -78,8 +78,8 @@ handler.all = async function (m) {
     }
 };
 
-handler.help = ['guessplayer']; // Command help
+handler.help = ['guesseye']; // Command help
 handler.tags = ['game'];
-handler.command = /^لاعب$/i; // Arabic command for "player"
+handler.command = /^ع|عين/i; // Matches Arabic commands for "eye"
 
 export default handler;
