@@ -12,7 +12,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const response = await fetch(endpoint)
 
     if (response.ok) {
-      const imageBuffer = await response.buffer()
+      const imageBuffer = await response.arrayBuffer()
       let imgurl = await uploadImage(imageBuffer)
       await conn.sendButton(m.chat,'Here is your Result', author, imgurl, [['Script', `.sc`]], null, [['Follow Me', `https://github.com/Guru322`]], m)
     } else {

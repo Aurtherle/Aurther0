@@ -557,7 +557,7 @@ export async function participantsUpdate({ id, participants, action }) {
 
             try {
               let welcomeResponse = await fetch(welcomeApiUrl)
-              let welcomeBuffer = await welcomeResponse.buffer()
+              let welcomeBuffer = await welcomeResponse.arrayBuffer()
 
               this.sendMessage(id, {
                 text: text,
@@ -614,7 +614,7 @@ export async function participantsUpdate({ id, participants, action }) {
 
             try {
               let leaveResponse = await fetch(leaveApiUrl)
-              let leaveBuffer = await leaveResponse.buffer()
+              let leaveBuffer = await leaveResponse.arrayBuffer()
 
               this.sendMessage(id, {
                 text: text,
