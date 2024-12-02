@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fs from 'fs';
 import similarity from 'similarity';
 
 let timeout = 60000; // 60 seconds timeout
@@ -17,8 +17,9 @@ let handler = async (m, { conn, command }) => {
         return;
     }
 
-    // Fetch a random anime character
-    let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/eyeanime.json')).json();
+    // Read and parse the local eyeanime.json file
+    let rawData = fs.readFileSync('./src/game/eyeanime.json', 'utf-8');
+    let src = JSON.parse(rawData);
     let json = src[Math.floor(Math.random() * src.length)];
 
     // Send the game message
@@ -109,5 +110,5 @@ function generateHint(name) {
 handler.help = ['guesseye']; // Command help
 handler.tags = ['game'];
 handler.command = /^ع|عين/i; // Matches Arabic commands for "eye"
-export const exp = 10000
+export const exp = 10000;
 export default handler;
