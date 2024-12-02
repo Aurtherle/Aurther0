@@ -392,7 +392,6 @@ async function connectionUpdate(update) {
     // Send message to the Rowner
     const rownerJid = '+966560801636@s.whatsapp.net'; // Rowner's JID
     await conn.sendMessage(rownerJid, { text: msg, mentions: [rownerJid] }, { quoted: null });
-}
 
     conn.logger.info(chalk.yellow('\n🚩 R E A D Y'))
   }
