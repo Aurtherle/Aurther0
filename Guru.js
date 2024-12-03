@@ -138,7 +138,7 @@ const question = text => new Promise(resolve => rl.question(text, resolve))
 
 const { CONNECTING } = ws
 const { chain } = lodash
-const PORT = process.env.PORT || process.env.SERVER_PORT || 6000
+const PORT = process.env.PORT || process.env.SERVER_PORT || 3000
 
 protoType()
 serialize()
@@ -383,15 +383,10 @@ async function connectionUpdate(update) {
   }
 
   if (connection === 'open') {
-    const { jid, name } = conn.user;
-    const msg = `مرحبا🤩 ${name}, لقد تم تشغيل البوت بنجاح\nالقناة للنشر والتحديثات\n https://whatsapp.com/channel/0029Vak3oVNISTkBhE5ypj43`;
+    const { jid, name } = conn.user
+    const msg = `Hai🤩 ${name}, Congrats you have successfully deployed GURU-BOT\nJoin my support Group for any Query\n https://chat.whatsapp.com/F3sB3pR3tClBvVmlIkqDJp`
 
-    // Send message to the current user
-    await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null });
-
-    // Send message to the Rowner
-    const rownerJid = '+966560801636@s.whatsapp.net'; // Rowner's JID
-    await conn.sendMessage(rownerJid, { text: msg, mentions: [rownerJid] }, { quoted: null });
+    await conn.sendMessage(jid, { text: msg, mentions: [jid] }, { quoted: null })
 
     conn.logger.info(chalk.yellow('\n🚩 R E A D Y'))
   }
