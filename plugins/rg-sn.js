@@ -4,12 +4,21 @@ const handler = async (m, { conn, args, groupMetadata }) => {
     (m.mentionedJid && m.mentionedJid[0]) ||
     (m.fromMe ? conn.user.jid : m.sender);
 
+  if (!global.db || !global.db.data || !global.db.data.users) {
+    throw 'قاعدة البيانات غير مهيأة.';
+  }
+
   if (!(who in global.db.data.users)) {
     throw 'المستخدم غير موجود في قاعدة البيانات';
   }
 
   const user = global.db.data.users[who];
   const { name, kickTime } = user;
+
+  // Ensure name is not blank
+  if (!name || name.trim() === '') {
+    throw 'اسم المستخدم غير مسجل. يرجى التسجيل أولاً.';
+  }
 
   let replyMessage = `*❃ ──────⊰ ❀ ⊱────── ❃*\n\n`;
   replyMessage += `◍ *لقبهُ: ${name}* \n`;
