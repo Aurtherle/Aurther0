@@ -76,8 +76,8 @@ if (/^دزمها$/i.test(m.text) ) { //sem prefixo
  } 
 
 
- if (/^ملل$/i.test(m.text) ) { //sem prefixo 
- conn.reply(m.chat, `*طيب اسكت*`, m) //wm, null, [['Menu', '#menu']], m) botones :V 
+ if (/^نوان$/i.test(m.text) ) { //sem prefixo 
+ conn.reply(m.chat, `*خلك منها فاشلة*`, m) //wm, null, [['Menu', '#menu']], m) botones :V 
 
  } 
 
