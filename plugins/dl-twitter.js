@@ -1,40 +1,64 @@
-import fetch from 'node-fetch'
+import axios from 'axios';
 
-let handler = async (m, { conn, usedPrefix, args, command, text }) => {
-  if (!text) throw `*تحتاج إلى إعطاء رابط فيديو، منشور، صورة أو ريل من تويتر*`
-  m.reply(wait)
+const handler = async (m, { conn, args }) => {
+  // Validate the message object
+  if (!m || typeof m !== 'object') {
+    console.log("Invalid message object.");
+    return;
+  }
 
-  let res
+  // Validate arguments
+  if (!args[0]) {
+    throw `*وين لينك تويتر؟*`;
+  }
+
+  // Send initial processing message
+  const { key } = await conn.sendMessage(
+    m.chat,
+    { text: "جاري المعالجة..." },
+    { quoted: m }
+  );
+  await conn.sendMessage(m.chat, { text: "صبر...", edit: key });
+
+  // Fetch the media from Twitter using the API
   try {
-    res = await fetch(`https://api.guruapi.tech/xdown?url=${text}`)
-  } catch (error) {
-    throw `حدث خطأ: ${error.message}`
-  }
+    const response = await axios.get(`https://deliriussapi-oficial.vercel.app/download/twitterv2?url=${args[0]}`);
+    const result = response.data;
 
-  let api_response = await res.json()
+    if (result.status && result.data?.media?.length > 0) {
+      const media = result.data.media[0]; // Get the first media item
+      const downloadUrl = media.type === "photo" ? media.image : media.video; // Check type
+      const filename = media.type === "photo" ? "image.jpg" : "video.mp4";
 
-  if (!api_response || !api_response.media) {
-    throw `لم يتم العثور على فيديو أو صورة أو استجابة غير صالحة من API.`
-  }
+      // Prepare additional info (optional)
+      const description = result.data.description || "No description available.";
+      const author = result.data.author.username || "Unknown";
 
-  const mediaArray = api_response.media
-
-  for (const mediaData of mediaArray) {
-    const mediaType = mediaData.type
-    const mediaURL = mediaData.url
-
-    let cap = `*تمت >,<*`
-
-    if (mediaType === 'video') {
-      conn.sendFile(m.chat, mediaURL, 'x.mp4', cap, m)
-    } else if (mediaType === 'image') {
-      conn.sendFile(m.chat, mediaURL, 'x.jpg', cap, m)
+      // Send media and description
+      await conn.sendFile(
+        m.chat,
+        downloadUrl,
+        filename,
+        `*وصف التغريدة:*\n${description}\n\n*الكاتب:* @${author}`,
+        m
+      );
+    } else {
+      throw new Error("No media found.");
     }
+  } catch (e) {
+    console.error("An error occurred with the Twitter API:", e);
+
+    // Notify the user of the error
+    await conn.sendMessage(
+      m.chat,
+      { text: `حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى لاحقًا.` },
+      { edit: key }
+    );
   }
-}
+};
 
-handler.help = ['Twitter']
-handler.tags = ['downloader']
-handler.command = /^(تويتر|تويت)$/i
+handler.help = ['twitter <link tw>'];
+handler.tags = ['downloader'];
+handler.command = /^(تويتر|twitter)$/i;
 
-export default handler
+export default handler;
