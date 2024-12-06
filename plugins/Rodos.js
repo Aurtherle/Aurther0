@@ -118,6 +118,11 @@ if (/^دزمها$/i.test(m.text) ) { //sem prefixo
 
 }
 
+ if (/^انس$/i.test(m.text) ) { //sem prefixo 
+ conn.reply(m.chat, `*رهيب بزياده*`, m) //wm, null, [['Menu', '#menu']], m) botones :V 
+
+}
+
 
    if (/^بوت$/i.test(m.text) ) { //sem prefixo 
  conn.reply(m.chat, `*لبيه ؟*`, m) //wm, null, [['Menu', '#menu']], m) botones :V
