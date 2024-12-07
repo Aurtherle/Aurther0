@@ -8,14 +8,14 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         room.id.startsWith('tictactoe') && [room.game.playerX, room.game.playerO].includes(m.sender)
     )
   )
-    throw `✳️ You are still in the game to restart the session write : *${usedPrefix}delttt*`
-  if (!text) throw `✳️ Put a number in the room`
+    throw `✳️ أنت بالفعل في لعبة. لإنهاء الجلسة اكتب: *${usedPrefix}لكس*`
+  if (!text) throw `✳️ الرجاء وضع رقم الغرفة`
   let room = Object.values(conn.game).find(
     room => room.state === 'WAITING' && (text ? room.name === text : true)
   )
   // m.reply('[WIP Feature]')
   if (room) {
-    m.reply('✅ mate found')
+    m.reply('✅ تم العثور على شريك')
     room.o = m.chat
     room.game.playerO = m.sender
     room.state = 'PLAYING'
@@ -35,16 +35,16 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
       }[v]
     })
     let str = `
-Waiting for @${room.game.currentTurn.split('@')[0]} as first player
+📢 الدور الآن على اللاعب @${room.game.currentTurn.split('@')[0]}
         
 ${arr.slice(0, 3).join('')}
 ${arr.slice(3, 6).join('')}
 ${arr.slice(6).join('')}
 
-▢ *Room ID* ${room.id}
+▢ *رقم الغرفة* ${room.id}
 
-▢ *Rules*
-‣ Make 3 rows of symbols vertically, horizontally or diagonally to win ‣ Type *surrender* to exit the game and be declared defeated
+▢ *القواعد*
+‣ قم بترتيب 3 رموز عمودياً، أفقيًا أو قطريًا للفوز. ‣ اكتب *استسلام* للخروج من اللعبة وإعلان الهزيمة.
 `.trim()
     if (room.x !== room.o)
       await conn.reply(room.x, str, m, {
@@ -65,10 +65,9 @@ ${arr.slice(6).join('')}
 
     conn.reply(
       m.chat,
-      `⏳ *expecting partner*\nType the following command to accept
-▢ *${usedPrefix + command} ${text}*
+      `⏳ *انتظار شريك*\nاكتب الأمر التالي للانضمام:\n▢ *${usedPrefix + command} ${text}*
 
-🎁 Reward:  *4999 XP*`,
+🎁 الجائزة: *4999 نقطة خبرة*`,
       m,
       {
         mentions: conn.parseMention(text),
@@ -79,8 +78,8 @@ ${arr.slice(6).join('')}
   }
 }
 
-handler.help = ['tictactoe <tag number>']
+handler.help = ['tictactoe <رقم الغرفة>']
 handler.tags = ['game']
-handler.command = ['tictactoe', 'ttc', 'ttt', 'xo']
+handler.command = ['tictactoe', 'اكس', 'ttt', 'xo']
 
 export default handler

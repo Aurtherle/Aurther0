@@ -22,11 +22,9 @@ export async function before(m) {
       room.state == 'PLAYING'
   )
   if (room) {
-    // m.reply(`[DEBUG]\n${parseInt(m.text)}`)
-    if (!/^([1-9]|(me)?nyerah|surr?ender)$/i.test(m.text)) return !0
+    if (!/^([1-9]|(me)?nyerah|surr?ender|استسلام)$/i.test(m.text)) return !0
     isSurrender = !/^[1-9]$/.test(m.text)
     if (m.sender !== room.game.currentTurn) {
-      // nek wayahku
       if (!isSurrender) return !0
     }
     if (debugMode)
@@ -43,10 +41,10 @@ export async function before(m) {
     ) {
       m.reply(
         {
-          '-3': 'The game is over',
-          '-2': 'Inválid',
-          '-1': 'Position inválid',
-          0: 'Position inválid',
+          '-3': '❌ اللعبة انتهت',
+          '-2': '❌ حركة غير صالحة',
+          '-1': '❌ الموقع غير صالح',
+          0: '❌ الموقع غير صالح',
         }[ok]
       )
       return !0
@@ -74,21 +72,21 @@ export async function before(m) {
     }
     let winner = isSurrender ? room.game.currentTurn : room.game.winner
     let str = `
-${isWin ? `@${winner.split('@')[0]} You are the winner 🎉 *+${winScore} XP*` : isTie ? `Game over, with a draw *+${playScore} XP*` : `Now is your turn ${['❎', '⭕'][1 * room.game._currentTurn]} (@${room.game.currentTurn.split('@')[0]})`} 
+${isWin ? `🎉 @${winner.split('@')[0]} فاز بالجولة *+${winScore} نقطة خبرة*` : isTie ? `⚖️ انتهت اللعبة بالتعادل *+${playScore} نقطة خبرة*` : `🎮 الدور الآن لـ ${['❎', '⭕'][1 * room.game._currentTurn]} (@${room.game.currentTurn.split('@')[0]})`} 
 
 ${arr.slice(0, 3).join('')}
 ${arr.slice(3, 6).join('')}
 ${arr.slice(6).join('')}
 
-▢ *PLAYER 1* ❎ : @${room.game.playerX.split('@')[0]} 
-▢ *PLAYER 2* ⭕ : @${room.game.playerO.split('@')[0]}
+▢ *اللاعب 1* ❎ : @${room.game.playerX.split('@')[0]} 
+▢ *اللاعب 2* ⭕ : @${room.game.playerO.split('@')[0]}
 
-Type *surrender* to give up 
+اكتب *استسلام* لإنهاء اللعبة.
 `.trim()
-    let users = global.global.db.data.users
+    let users = global.db.data.users
     if ((room.game._currentTurn ^ isSurrender ? room.x : room.o) !== m.chat)
       room[room.game._currentTurn ^ isSurrender ? 'x' : 'o'] = m.chat
-    const btn = isTie ? ['TicTacToe', '/ttt'] : ['Surrender', 'surrender']
+    const btn = isTie ? ['لعبة جديدة', '/ttt'] : ['استسلام', 'استسلام']
     if (room.x !== room.o)
       await this.reply(room.x, str, m, {
         mentions: this.parseMention(str),
