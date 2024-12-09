@@ -17,7 +17,7 @@ let handler = async (m, { conn, participants, usedPrefix, command }) => {
 
 handler.help = ['kick @user'];
 handler.tags = ['group'];
-handler.command = ['اتوكل', 'كلبطه', 'اخرس', 'طرد', 'دزمها', 'احبك', 'اكرهك', 'مغربي', 'تصرف خاطئ', 'يمني'];
+handler.command = ['اتوكل', 'كلبطه', 'اخرس', 'طرد', 'دزمها', 'احبك', 'اكرهك', 'مغربي', 'منغولي', 'يمني'];
 handler.admin = true;
 handler.group = true;
 handler.botAdmin = true;
