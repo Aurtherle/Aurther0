@@ -33,7 +33,7 @@ let handler = async (m, { conn, args, command }) => {
             break;
         }
 
-        case 'لقبي': {
+        case 'لقبني': {
             // Join the game by specifying a name
             if (!gameActive) return conn.reply(m.chat, "*❃ اللعبة غير مفعلة حالياً ❃*", m);
 

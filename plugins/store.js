@@ -1,7 +1,10 @@
 let storeHandler = async (m, { conn, args }) => {
   const storeItems = {
-    لعنة: { price: 2000000 },
-    صمت: { price: 1500000 },
+    لعنة: { price: 5000 },
+    صمت: { price: 1500 },
+    سيف: { price: 1000 },
+    درع: { price: 800 },
+    جرعة: { price: 500 },
   };
 
   if (!args[0]) {
