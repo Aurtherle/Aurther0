@@ -17,26 +17,31 @@ let handler = async (m, { conn, command }) => {
         return;
     }
 
-    // Fetch a random anime character
-    let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/guessanime.json')).json();
-    let json = src[Math.floor(Math.random() * src.length)];
+    try {
+        // Fetch a random anime character
+        let src = await (await fetch('https://raw.githubusercontent.com/Aurtherle/Games/main/.github/workflows/guessanime.json')).json();
+        let json = src[Math.floor(Math.random() * src.length)];
 
-    // Send the game message
-    let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*من الشخصية ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} خبرة\nاستخدم "انسحب" للإنسحاب أو "تلميح" للحصول على تلميح\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
-    let msg = await conn.sendFile(m.chat, json.img, '', caption, m);
+        // Send the game message
+        let caption = `*❃ ──────⊰ ❀ ⊱────── ❃*\n*من الشخصية ؟؟*\n\n*الوقت :* ${(timeout / 1000).toFixed(2)} ثانية\n*الجائزة :* ${poin} خبرة\nاستخدم "انسحب" للإنسحاب أو "تلميح" للحصول على تلميح\n*❃ ──────⊰ ❀ ⊱────── ❃*`;
+        let msg = await conn.sendFile(m.chat, json.img, '', caption, m);
 
-    // Store game state
-    games[id] = {
-        json,
-        poin,
-        msg,
-        timeout: setTimeout(() => {
-            if (games[id]) {
-                conn.reply(m.chat, `*❃ ──────⊰ ❀ ⊱────── ❃*\n*خلص الوقت*\n*الجواب :* ${json.name}\n*❃ ──────⊰ ❀ ⊱────── ❃*`, msg);
-                delete games[id];
-            }
-        }, timeout),
-    };
+        // Store game state
+        games[id] = {
+            json,
+            poin,
+            msg,
+            timeout: setTimeout(() => {
+                if (games[id]) {
+                    conn.reply(m.chat, `*❃ ──────⊰ ❀ ⊱────── ❃*\n*خلص الوقت*\n*الجواب :* ${json.name}\n*❃ ──────⊰ ❀ ⊱────── ❃*`, msg);
+                    delete games[id];
+                }
+            }, timeout),
+        };
+    } catch (err) {
+        console.error(err);
+        conn.reply(m.chat, '*حدث خطأ أثناء جلب البيانات. حاول مجددًا لاحقًا.*', m);
+    }
 };
 
 // Recognize replies to the bot's message
@@ -73,8 +78,19 @@ handler.all = async function (m) {
 
     if (answer === correct) {
         // Correct answer
+        if (!global.db.data.users[m.sender].credit) {
+            global.db.data.users[m.sender].credit = 0;
+        }
+
         global.db.data.users[m.sender].exp += game.poin;
-        this.reply(m.chat, `*❃ ──────⊰ ❀ ⊱────── ❃*\n*❀ شوكولولو ❀*\n\n*◍ الجائزة :* ${game.poin} خبرة\n*❃ ──────⊰ ❀ ⊱────── ❃*`, m);
+        global.db.data.users[m.sender].credit += 50;
+
+        this.reply(
+            m.chat,
+            `*❃ ──────⊰ ❀ ⊱────── ❃*\n*❀ شوكولولو ❀*\n\n*◍ الجائزة :* ${game.poin} خبرة\n*◍ الرصيد :* 50 بيلي\n*❃ ──────⊰ ❀ ⊱────── ❃*`,
+            m
+        );
+
         clearTimeout(game.timeout);
         delete games[id];
     } else if (similarity(answer, correct) >= threshold) {
@@ -109,5 +125,5 @@ function generateHint(name) {
 handler.help = ['guessanime']; // Command help
 handler.tags = ['game'];
 handler.command = /^احزر$/i; // Arabic command for "character"
-export const exp = 10000
+export const exp = 10000;
 export default handler;

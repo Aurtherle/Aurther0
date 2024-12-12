@@ -10,9 +10,9 @@ ${usedPrefix + command} 1000`.trim()
   let credit = users.credit
   let amount =
     (args[0] && number(parseInt(args[0]))
-      ? Math.max(parseInt(args[0]), 1)
+      ? Math.min(Math.max(parseInt(args[0]), 1), 2000) // Limit the max amount to 2000
       : /all/i.test(args[0])
-        ? Math.floor(parseInt(users.credit))
+        ? Math.min(2000, Math.floor(parseInt(users.credit))) // Limit "all" to 2000 or current credit
         : 1) * 1
 
   let time = users.lastcf + 90000
@@ -20,23 +20,24 @@ ${usedPrefix + command} 1000`.trim()
     throw `يمكنك لعب قتال الدجاج مرة أخرى بعد ${msToTime(time - new Date())}`
   if (amount < 100) throw `🟥 *لا يمكنك القتال بأقل من 100 بيلي*`
   if (users.credit < amount)
-    throw `🟥 *ليس لديك ما يكفي من البيلي لهذه للقتال.*\n*لديك حاليًا فقط ${credit} بيلي.*`
+    throw `🟥 *ليس لديك ما يكفي من البيلي لهذه القتال.*\n*لديك حاليًا فقط ${credit} بيلي.*`
   if (users.chicken < 1) {
     throw `🟥 *ليس لديك أي دجاجة للقتال* \nاستخدم الأمر ${usedPrefix}buy-chicken`
   }
 
-  let botScore = Math.ceil(Math.random() * 35) * 1 // Random score for the bot (1 to 35)
-  let playerScore = Math.floor(Math.random() * 101) * 1 // Random score for the player (1 to 100)
+  // Adjusted win/loss probabilities
+  let outcome = Math.random() < 0.4 // 40% chance of winning
   let status = `دجاجتك ماتت 🪦`
 
-  if (botScore < playerScore) {
+  if (outcome) {
     users.credit += amount * 1
     status = `دجاجتك الصغيرة فازت بالقتال، وربحت لك 🪙 ${amount * 2} بيلي! 🐥`
   } else {
     users.credit -= amount * 1
     users.chicken -= 1
-    users.lastcf = new Date() * 1
   }
+
+  users.lastcf = new Date() * 1 // Move cooldown update here for consistency
 
   let result = `${status}
       `.trim()

@@ -52,59 +52,67 @@ handler.all = async function (m) {
     // Ensure the reply is to the bot's question message
     if (!m.quoted || m.quoted.id !== game.msg.id) return;
 
-    // Check if the user asked for a hint
-    if (/^(تلميح)$/i.test(m.text)) {
-        let answer = game.json.name;
-        let hint = generateHint(answer);
-        this.reply(m.chat, `*تلميح:* ${hint}`, m);
-        return;
-    }
+    // Normalize user input and the correct answer
+    let userAnswer = normalizeAnswer(m.text);
+    let correctAnswer = normalizeAnswer(game.json.name);
 
-    // Check if the user surrendered
-    if (/^(انسحب|surr?ender)$/i.test(m.text)) {
+    if (userAnswer === correctAnswer) {
+        // Correct answer - reward experience points and credits
+        global.db.data.users[m.sender].exp += game.poin;
+
+        // Ensure user has a "credit" property in the database
+        if (!global.db.data.users[m.sender].credit) {
+            global.db.data.users[m.sender].credit = 0;
+        }
+
+        global.db.data.users[m.sender].credit += 50;
+
+        this.reply(
+            m.chat,
+            `*❃ ──────⊰ ❀ ⊱────── ❃*\n*❀ شوكولولو ❀*\n\n*◍ الجائزة :* ${game.poin} خبرة\n*◍ الرصيد :* 50 بيلي\n*❃ ──────⊰ ❀ ⊱────── ❃*`,
+            m
+        );
+
+        clearTimeout(game.timeout);
+        delete games[id];
+    } else if (similarity(userAnswer, correctAnswer) >= threshold) {
+        // Close answer
+        this.reply(m.chat, '*اوخخ قربتت*', m);
+    } else if (/^(تلميح|hint)$/i.test(m.text)) {
+        // Provide a hint
+        game.hintsRequested = (game.hintsRequested || 0) + 1;
+        let hint = generateHint(game.json.name, game.hintsRequested);
+        this.reply(m.chat, `*تلميح:* ${hint}`, m);
+    } else if (/^(انسحب|surr?ender)$/i.test(m.text)) {
+        // Handle surrender
         clearTimeout(game.timeout);
         delete games[id];
         this.reply(m.chat, '*ماااش مافي مستوى*', m);
-        return;
-    }
-
-    // Check the user's answer
-    let answer = m.text.trim().toLowerCase();
-    let correct = game.json.name.toLowerCase().trim();
-
-    if (answer === correct) {
-        // Correct answer
-        global.db.data.users[m.sender].exp += game.poin;
-        this.reply(m.chat, `*❃ ──────⊰ ❀ ⊱────── ❃*\n*❀ شوكولولو ❀*\n\n*◍ الجائزة :* ${game.poin} خبرة\n*❃ ──────⊰ ❀ ⊱────── ❃*`, m);
-        clearTimeout(game.timeout);
-        delete games[id];
-    } else if (similarity(answer, correct) >= threshold) {
-        // Close answer
-        this.reply(m.chat, '*اوخخ قربتت*', m);
     } else {
         // Wrong answer
         this.reply(m.chat, '*نااه*', m);
     }
 };
 
-// Generate a randomized hint for the name
-function generateHint(name) {
-    let nameArray = name.split('');
-    let revealedIndexes = [];
+// Normalize answers for comparison
+function normalizeAnswer(answer) {
+    return answer.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
 
-    // Reveal a random 50% of the letters
-    while (revealedIndexes.length < Math.ceil(name.length / 2)) {
-        let randomIndex = Math.floor(Math.random() * name.length);
-        if (!revealedIndexes.includes(randomIndex)) {
-            revealedIndexes.push(randomIndex);
-        }
+// Generate a randomized hint for the name
+function generateHint(name, requested) {
+    let nameArray = [...name];
+    let hint = nameArray.map(() => '_');
+    let revealCount = Math.min(requested, name.length);
+
+    let revealedIndexes = new Set();
+    while (revealedIndexes.size < revealCount) {
+        let index = Math.floor(Math.random() * name.length);
+        revealedIndexes.add(index);
     }
 
-    // Generate the hint by replacing unrevealed letters with underscores
-    let hint = nameArray
-        .map((char, index) => (revealedIndexes.includes(index) ? char : '_'))
-        .join('');
-    return hint;
+    revealedIndexes.forEach(i => hint[i] = nameArray[i]);
+    return hint.join('');
 }
 
 handler.help = ['guesseye']; // Command help
