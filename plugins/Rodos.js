@@ -123,9 +123,13 @@ if (/^دزمها$/i.test(m.text) ) { //sem prefixo
 
 }
 
+ if (/^بياكويا$/i.test(m.text) ) { //sem prefixo 
+ conn.reply(m.chat, `*العم بياكويا راعي الطيب والمرجلة*`, m) //wm, null, [['Menu', '#menu']], m) botones :V 
 
-   if (/^بوت$/i.test(m.text) ) { //sem prefixo 
- conn.reply(m.chat, `*لبيه ؟*`, m) //wm, null, [['Menu', '#menu']], m) botones :V
+}
+
+   if (/^جينكس$/i.test(m.text) ) { //sem prefixo 
+ conn.reply(m.chat, `*عمتي جينكس*`, m) //wm, null, [['Menu', '#menu']], m) botones :V
    }
  return !0 } 
  export default handler
