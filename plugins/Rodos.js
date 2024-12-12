@@ -128,6 +128,11 @@ if (/^دزمها$/i.test(m.text) ) { //sem prefixo
 
 }
 
+ if (/^مين محمد عبده$/i.test(m.text) ) { //sem prefixo 
+ conn.reply(m.chat, `*رجل جميل و مز و اجمل رجل و معضل وغوي*`, m) //wm, null, [['Menu', '#menu']], m) botones :V 
+
+}
+
    if (/^جينكس$/i.test(m.text) ) { //sem prefixo 
  conn.reply(m.chat, `*عمتي جينكس*`, m) //wm, null, [['Menu', '#menu']], m) botones :V
    }

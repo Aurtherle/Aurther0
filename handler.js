@@ -49,57 +49,98 @@ export async function handler(chatUpdate) {
     m.chicken = false
     try {
       // TODO: use loop to insert data instead of this
-      let user = global.db.data.users[m.sender]
-      if (typeof user !== 'object') global.db.data.users[m.sender] = {}
-      if (user) {
-        if (!isNumber(user.exp)) user.exp = 0
-        if (!isNumber(user.credit)) user.credit = 10
-        if (!isNumber(user.bank)) user.bank = 0
-        if (!isNumber(user.chicken)) user.chicken = 0
-        if (!isNumber(user.lastclaim)) user.lastclaim = 0
-        if (!('registered' in user)) user.registered = false
-        //-- user registered
-        if (!user.registered) {
-          if (!('name' in user)) user.name = m.name
-          if (!isNumber(user.age)) user.age = -1
-          if (!isNumber(user.regTime)) user.regTime = -1
-        }
-        //--user number
-        if (!isNumber(user.afk)) user.afk = -1
-        if (!('afkReason' in user)) user.afkReason = ''
-        if (!('banned' in user)) user.banned = false
-        if (!isNumber(user.warn)) user.warn = 0
-        if (!isNumber(user.level)) user.level = 0
-        if (!('role' in user)) user.role = 'Tadpole'
-        if (!('autolevelup' in user)) user.autolevelup = false
-         // Count user messages
-        if (!isNumber(user.messages))
-        user.messages = 0
-    user.messages++
-      } else {
-        global.db.data.users[m.sender] = {
-          exp: 0,
-          credit: 0,
-          bank: 0,
-          chicken: 0,
-          lastclaim: 0,
-          registered: false,
-          name: m.name,
-          age: -1,
-          regTime: -1,
-          afk: -1,
-          afkReason: '',
-          banned: false,
-          warn: 0,
-          level: 0,
-          role: 'Tadpole',
-          autolevelup: true,
-          messages: 1, // Start counting messages at 1 for new users
-          kickTime: 0,
-          scheduledKick: false,
-          remainingKickTime: 0,
-        }
-      }
+      let user = global.db.data.users[m.sender];
+
+// Initialize user data if it doesn't exist
+if (typeof user !== 'object') global.db.data.users[m.sender] = {};
+
+if (user) {
+  // Ensure default values for user fields
+  if (!isNumber(user.exp)) user.exp = 0;
+  if (!isNumber(user.credit)) user.credit = 10;
+  if (!isNumber(user.bank)) user.bank = 0;
+  if (!isNumber(user.chicken)) user.chicken = 0;
+  if (!isNumber(user.lastclaim)) user.lastclaim = 0;
+  if (!('registered' in user)) user.registered = false;
+
+  // User registration defaults
+  if (!user.registered) {
+    if (!('name' in user)) user.name = m.name;
+    if (!isNumber(user.age)) user.age = -1;
+    if (!isNumber(user.regTime)) user.regTime = -1;
+  }
+
+  // Ensure default values for other fields
+  if (!isNumber(user.afk)) user.afk = -1;
+  if (!('afkReason' in user)) user.afkReason = '';
+  if (!('banned' in user)) user.banned = false;
+  if (!isNumber(user.warn)) user.warn = 0;
+  if (!isNumber(user.level)) user.level = 0;
+  if (!('role' in user)) user.role = 'Tadpole';
+  if (!('autolevelup' in user)) user.autolevelup = false;
+  if (!isNumber(user.messages)) user.messages = 0;
+
+  // Increment total messages
+  user.messages++;
+
+  // **Daily Tracking**
+  const today = new Date().toISOString().slice(0, 10);
+  if (!user.daily) user.daily = {}; // Ensure daily field exists
+  if (!isNumber(user.daily[today])) user.daily[today] = 0; // Initialize today's messages
+  user.daily[today]++; // Increment today's message count
+
+  // **Weekly Tracking**
+  const dayOfWeek = new Date().getDay(); // Get current day of the week (0=Sunday, 1=Monday, ..., 5=Friday)
+  const daysUntilFriday = (5 - dayOfWeek + 7) % 7; // Days until the upcoming Friday (0 to 6)
+
+  // Calculate the upcoming Friday date
+  let currentFriday = new Date();
+  currentFriday.setDate(currentFriday.getDate() + daysUntilFriday);
+  currentFriday = currentFriday.toISOString().slice(0, 10); // Format as YYYY-MM-DD
+
+  if (!user.weekly) user.weekly = {}; // Initialize weekly field
+  if (!isNumber(user.weekly[currentFriday])) user.weekly[currentFriday] = 0; // Initialize weekly messages
+  user.weekly[currentFriday]++; // Increment weekly message count
+
+} else {
+  // Initialize user if they don't exist in the database
+  const today = new Date().toISOString().slice(0, 10);
+
+  const dayOfWeek = new Date().getDay();
+  const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+  let currentFriday = new Date();
+  currentFriday.setDate(currentFriday.getDate() + daysUntilFriday);
+  currentFriday = currentFriday.toISOString().slice(0, 10);
+
+  global.db.data.users[m.sender] = {
+    exp: 0,
+    credit: 10,
+    bank: 0,
+    chicken: 0,
+    lastclaim: 0,
+    registered: false,
+    name: m.name,
+    age: -1,
+    regTime: -1,
+    afk: -1,
+    afkReason: '',
+    banned: false,
+    warn: 0,
+    level: 0,
+    role: 'Tadpole',
+    autolevelup: true,
+    messages: 1, // Start message count at 1
+    daily: {
+      [today]: 1, // Start today's messages at 1
+    },
+    weekly: {
+      [currentFriday]: 1, // Start weekly messages at 1 for this Friday
+    },
+    kickTime: 0,
+    scheduledKick: false,
+    remainingKickTime: 0,
+  };
+}
       let chat = global.db.data.chats[m.chat]
       if (typeof chat !== 'object') global.db.data.chats[m.chat] = {}
       if (chat) {
