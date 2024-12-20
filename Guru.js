@@ -335,23 +335,31 @@ function runCleanup() {
       console.error('An error occurred during temporary file cleanup:', error)
     })
     .finally(() => {
-      // 2 minutes
-      setTimeout(runCleanup, 1000 * 60 * 2)
-    })
+      // Run cleanup every 2 minutes
+      setTimeout(runCleanup, 1000 * 60 * 2);
+    });
 }
 
-runCleanup()
+function runClearSession() {
+  try {
+    clearsession();
+    console.log('Session cleanup completed.');
+  } catch (error) {
+    console.error('An error occurred during session cleanup:', error);
+  } finally {
+    // Run session cleanup every 10 minutes
+    setTimeout(runClearSession, 1000 * 60 * 10);
+  }
+}
 
 function clearsession() {
-  let prekey = []
-  const directorio = readdirSync('./session')
-  const filesFolderPreKeys = directorio.filter(file => {
-    return file.startsWith('pre-key-')
-  })
-  prekey = [...prekey, ...filesFolderPreKeys]
-  filesFolderPreKeys.forEach(files => {
-    unlinkSync(`./session/${files}`)
-  })
+  let prekey = [];
+  const directorio = readdirSync('./session');
+  const filesFolderPreKeys = directorio.filter(file => file.startsWith('pre-key-'));
+  prekey = [...prekey, ...filesFolderPreKeys];
+  filesFolderPreKeys.forEach(file => {
+    unlinkSync(`./session/${file}`);
+  });
 }
 
 async function connectionUpdate(update) {
