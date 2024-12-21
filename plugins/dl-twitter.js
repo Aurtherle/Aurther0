@@ -51,7 +51,7 @@ const handler = async (m, { conn, args }) => {
     // Notify the user of the error
     await conn.sendMessage(
       m.chat,
-      { text: `حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى لاحقًا.` },
+      { text: `حدث خطأ أثناء معالجة طلبك. حاول مرة أخرى لاحقًا` },
       { edit: key }
     );
   }
